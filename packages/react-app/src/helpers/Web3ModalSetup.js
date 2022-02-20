@@ -4,6 +4,7 @@ import Web3Modal from "web3modal";
 import Portis from "@portis/web3";
 import WalletConnectProvider from "@walletconnect/web3-provider";
 import Authereum from "authereum";
+import Torus from "@toruslabs/torus-embed";
 import { INFURA_ID, ALCHEMY_KEY } from "../constants";
 
 // Coinbase walletLink init
@@ -35,7 +36,7 @@ const web3ModalSetup = () =>
             137: "https://polygon-rpc.com",
             31337: "http://localhost:8545",
             42161: "https://arb1.arbitrum.io/rpc",
-            80001: "https://rpc-mumbai.maticvigil.com"
+            80001: "https://rpc-mumbai.maticvigil.com",
           },
         },
       },
@@ -56,19 +57,19 @@ const web3ModalSetup = () =>
           key: "pk_live_5A7C91B2FC585A17", // required
         },
       },
-      // torus: {
-      //   package: Torus,
-      //   options: {
-      //     networkParams: {
-      //       host: "https://localhost:8545", // optional
-      //       chainId: 1337, // optional
-      //       networkId: 1337 // optional
-      //     },
-      //     config: {
-      //       buildEnv: "development" // optional
-      //     },
-      //   },
-      // },
+      torus: {
+        package: Torus,
+        options: {
+          networkParams: {
+            host: "https://localhost:8545", // optional
+            // chainId: 1337, // optional
+            // networkId: 1337, // optional
+          },
+          config: {
+            buildEnv: "development", // optional
+          },
+        },
+      },
       "custom-walletlink": {
         display: {
           logo: "https://play-lh.googleusercontent.com/PjoJoG27miSglVBXoXrxBSLveV6e3EeBPpNY55aiUUBM9Q1RCETKCOqdOkX2ZydqVf0",
@@ -83,6 +84,28 @@ const web3ModalSetup = () =>
       },
       authereum: {
         package: Authereum, // required
+      },
+      "custom-binancechainwallet": {
+        display: {
+          logo: "https://digitalmarket.com/wp-content/plugins/walogin/assets/images/binancewallet.png",
+          name: "Binance Chain Wallet",
+          description: "Connect to your Binance Chain Wallet",
+        },
+        package: true,
+        connector: async () => {
+          let provider = null;
+          if (typeof window.BinanceChain !== "undefined") {
+            provider = window.BinanceChain;
+            try {
+              await provider.request({ method: "eth_requestAccounts" });
+            } catch (error) {
+              throw new Error("User Rejected");
+            }
+          } else {
+            throw new Error("No Binance Chain Wallet found");
+          }
+          return provider;
+        },
       },
     },
   });
